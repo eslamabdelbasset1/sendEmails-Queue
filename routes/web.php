@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\sendEmailController;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,5 +30,12 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 Route::get('/send_emails', [sendEmailController::class, 'form'])->name('send_emails_form');
 Route::post('/send_emails', [sendEmailController::class, 'send_emails'])->name('send_emails');
+
+Route::get('/log' , function () {
+//    Log::channel('send_emails')->info('Emails  ', [
+//
+//    ]);
+});
+
 
 

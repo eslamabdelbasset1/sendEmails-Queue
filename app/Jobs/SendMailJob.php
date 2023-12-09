@@ -9,7 +9,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+
 
 class SendMailJob implements ShouldQueue
 {
@@ -31,25 +33,37 @@ class SendMailJob implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
+     * @return \Exception
      */
     public function handle()
     {
 
 
-        $users = User::all();
-        $input['title'] = $this->details['title'];
-        $input['body'] = $this->details['body'];
+        try {
 
-        foreach ($users as $user) {
-            $input['name'] = $user->name;
-            $input['email'] = $user->email;
+            $users = User::all();
+            $input['title'] = $this->details['title'];
+            $input['body'] = $this->details['body'];
+            Log::channel('send_emails')->info("Prepare Messages For : {$users->count()} Users");
+
+            foreach ($users as $user) {
+                $input['name'] = $user->name;
+                $input['email'] = $user->email;
+
+                Log::channel('send_emails')->info('Prepare Message ');
+                Mail::send('mail.test_mail', ['input' => $input], function ($message) use ($input) {
+                    $message->to($input['email'], $input['name'])
+                        ->subject($input['title']);
+                });
+                sleep(1);
+                Log::channel('send_emails')->info('Message To ' . $user->email);
 
 
-            Mail::send('mail.test_mail', ['input' => $input], function ($message) use ($input) {
-                $message->to($input['email'], $input['name'])
-                    ->subject($input['title']);
-            });
+            }
+
+        } catch (\Throwable $exception) {
+
+            Log::channel('send_emails')->info("Error failed To Send For User : {$user->email} , Exception : " . $exception->getMessage());
         }
 
     }

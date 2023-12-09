@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\SendMailJob;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class sendEmailController extends Controller
@@ -29,8 +30,11 @@ class sendEmailController extends Controller
             'body' => $request->body,
         ];
 
-        $job = (new SendMailJob($details));
-        dispatch($job);
+        dispatch(new SendMailJob($details));
+
+//        Log::channel('send_emails')->info('send_emails',[
+//            'jobs' => $job,
+//        ]);
 
         return back()->with('status', 'Mails sent successfully');
 
